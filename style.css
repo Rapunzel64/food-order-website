@@ -391,6 +391,12 @@ header .container {
     font-size: 18px;
 }
 
+.checkout-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .empty-cart-message {
     text-align: center;
     color: #666;

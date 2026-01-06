@@ -3,7 +3,7 @@ const foodData = [
     {
         id: 1,
         name: "Margherita Pizza",
-        price: 12.99,
+        price: 1000.99,
         category: "pizza",
         image: "img/food/p1.jpg",
         description: "Classic pizza with tomato sauce, mozzarella, and basil"
@@ -11,7 +11,7 @@ const foodData = [
     {
         id: 2,
         name: "Pepperoni Pizza",
-        price: 14.99,
+        price: 850.00,
         category: "pizza",
         image: "img/category/pizza.jpg",
         description: "Pizza topped with pepperoni and mozzarella cheese"
@@ -19,7 +19,7 @@ const foodData = [
     {
         id: 3,
         name: "Cheeseburger",
-        price: 9.99,
+        price: 450.50,
         category: "burger",
         image: "img/food/b1.jpg",
         description: "Juicy beef burger with cheese, lettuce, and tomato"
@@ -27,7 +27,7 @@ const foodData = [
     {
         id: 4,
         name: "Chicken Burger",
-        price: 10.99,
+        price: 550.70,
         category: "burger",
         image: "img/category/burger.jpg",
         description: "Grilled chicken breast with special sauce"
@@ -35,7 +35,7 @@ const foodData = [
     {
         id: 5,
         name: "Club Sandwich",
-        price: 8.99,
+        price: 800.00,
         category: "sandwich",
         image: "img/food/s1.jpg",
         description: "Triple-decker sandwich with turkey, bacon, and vegetables"
@@ -43,7 +43,7 @@ const foodData = [
     {
         id: 6,
         name: "Veggie Sandwich",
-        price: 7.99,
+        price: 500.00,
         category: "sandwich",
         image: "img/category/sandwich.jpg",
         description: "Fresh vegetables with hummus and sprouts"
@@ -52,6 +52,18 @@ const foodData = [
 
 // Cart array
 let cart = [];
+
+// Resolve asset path so images load correctly from pages inside `htmlfiles/`
+function resolveAssetPath(assetPath) {
+    try {
+        if (window.location && window.location.pathname && window.location.pathname.includes('/htmlfiles/')) {
+            return '..\/' + assetPath;
+        }
+    } catch (e) {
+        // fallback to original path
+    }
+    return assetPath;
+}
 
 // DOM Elements
 const cartLink = document.getElementById('cartLink');
@@ -77,7 +89,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     closeCart.addEventListener('click', closeCartModal);
-    checkoutBtn.addEventListener('click', checkout);
+    if (checkoutBtn) {
+        console.log('checkoutBtn found, attaching listener');
+        checkoutBtn.addEventListener('click', function(e) {
+            console.log('checkoutBtn clicked');
+            checkout(e);
+        });
+    }
     
     // Close modal when clicking outside
     window.addEventListener('click', function(event) {
@@ -98,7 +116,7 @@ function displayFeaturedFoods() {
         const foodCard = document.createElement('div');
         foodCard.className = 'food-card';
         foodCard.innerHTML = `
-            <img src="${food.image}" alt="${food.name}">
+            <img src="${resolveAssetPath(food.image)}" alt="${food.name}">
             <div class="food-info">
                 <h3>${food.name}</h3>
                 <p>${food.description}</p>
@@ -120,6 +138,7 @@ function displayFeaturedFoods() {
 
 // Add item to cart
 function addToCart(foodId) {
+    console.log('addToCart called with id:', foodId);
     const food = foodData.find(item => item.id === foodId);
     
     if (food) {
@@ -210,6 +229,11 @@ function updateCartUI() {
     
     cartTotal.textContent = total.toFixed(2);
     
+    // Enable/disable checkout button based on cart contents
+    if (checkoutBtn) {
+        checkoutBtn.disabled = cart.length === 0;
+    }
+    
     // Add event listeners to cart buttons
     document.querySelectorAll('.quantity-btn.minus').forEach(button => {
         button.addEventListener('click', function() {
@@ -244,36 +268,42 @@ function closeCartModal() {
 }
 
 // Checkout function
-function checkout() {
+function checkout(event) {
+    console.log('checkout invoked, cart length:', cart.length, 'cart:', cart);
     if (cart.length === 0) {
         alert('Your cart is empty!');
         return;
     }
-    
-    // Save order to localStorage
-    const order = {
-        items: [...cart],
-        total: parseFloat(cartTotal.textContent),
-        timestamp: new Date().toISOString()
-    };
-    
-    // Get existing orders or initialize empty array
-    const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-    
-    // Generate bill preview
-    generateBillPreview(order);
-    
-    // Clear cart
-    cart = [];
-    saveCartToLocalStorage();
-    updateCartUI();
-    closeCartModal();
+    try {
+        // Save order to localStorage
+        const order = {
+            items: [...cart],
+            total: parseFloat(cartTotal.textContent),
+            timestamp: new Date().toISOString()
+        };
+        
+        // Get existing orders or initialize empty array
+        const orders = JSON.parse(localStorage.getItem('orders')) || [];
+        orders.push(order);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        
+        // Generate bill preview
+        generateBillPreview(order);
+        
+        // Clear cart
+        cart = [];
+        saveCartToLocalStorage();
+        updateCartUI();
+        closeCartModal();
+    } catch (err) {
+        console.error('Checkout error:', err);
+        alert('Checkout failed: ' + (err && err.message ? err.message : err));
+    }
 }
 
 // Generate bill preview
 function generateBillPreview(order) {
+    console.log('generateBillPreview called. order:', order);
     // Create bill content
     let billContent = `
 =====================================
@@ -306,10 +336,11 @@ Total Amount: $${order.total.toFixed(2)}
     
     // Show bill preview modal
     showBillPreview(billContent, order);
-}
+} 
 
 // Show bill preview modal
 function showBillPreview(billContent, order) {
+    console.log('showBillPreview called, billContent length:', billContent ? billContent.length : 0);
     // Create modal if it doesn't exist
     let billModal = document.getElementById('billModal');
     if (!billModal) {
@@ -336,20 +367,21 @@ function showBillPreview(billContent, order) {
         `;
         document.body.appendChild(billModal);
         
-        // Add event listeners
-        document.getElementById('closeBill').addEventListener('click', () => {
+        // Add event listeners safely using local queries
+        const closeEl = billModal.querySelector('#closeBill');
+        if (closeEl) closeEl.addEventListener('click', () => {
             billModal.style.display = 'none';
         });
-        
-        document.getElementById('closeBillBtn').addEventListener('click', () => {
+        const closeBtn = billModal.querySelector('#closeBillBtn');
+        if (closeBtn) closeBtn.addEventListener('click', () => {
             billModal.style.display = 'none';
         });
-        
-        document.getElementById('downloadTxt').addEventListener('click', () => {
+        const downloadTxt = billModal.querySelector('#downloadTxt');
+        if (downloadTxt) downloadTxt.addEventListener('click', () => {
             downloadBillAsTxt(billContent, order);
         });
-        
-        document.getElementById('downloadPdf').addEventListener('click', () => {
+        const downloadPdf = billModal.querySelector('#downloadPdf');
+        if (downloadPdf) downloadPdf.addEventListener('click', () => {
             downloadBillAsPdf(billContent, order);
         });
         
@@ -362,10 +394,20 @@ function showBillPreview(billContent, order) {
     }
     
     // Update bill content
-    document.getElementById('billPreview').textContent = billContent;
+    const billPreviewEl = document.getElementById('billPreview') || (billModal && billModal.querySelector('#billPreview'));
+    if (!billPreviewEl) {
+        console.error('billPreview element not found');
+    } else {
+        billPreviewEl.textContent = billContent;
+    }
     
     // Show modal
-    billModal.style.display = 'flex';
+    if (billModal) {
+        billModal.style.display = 'flex';
+        console.log('billModal displayed');
+    } else {
+        console.error('billModal not available to display');
+    }
 }
 
 // Download bill as TXT
@@ -437,7 +479,7 @@ function displayMenuFoods(category = 'all') {
         const foodCard = document.createElement('div');
         foodCard.className = 'food-card';
         foodCard.innerHTML = `
-            <img src="${food.image}" alt="${food.name}">
+            <img src="${resolveAssetPath(food.image)}" alt="${food.name}">
             <div class="food-info">
                 <h3>${food.name}</h3>
                 <p>${food.description}</p>

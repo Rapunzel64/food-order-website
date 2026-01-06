@@ -1,0 +1,166 @@
+/*login page */
+ * {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    width: 80%;
+}
+
+.image-section {
+    width: 50%;
+    background: #f3f1e7;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image-section img {
+    width: 80%;
+    height: 80%;
+}
+
+.form-section {
+    width: 50%;
+    background: #f3f1e7;
+    padding: 50px;
+}
+
+.form-section h2 {
+    margin-bottom: 30px;
+}
+
+.form-section input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: medium;
+}
+
+.form-section input:placeholder-shown {
+    outline: 2px solid #141313;
+}
+    
+.checkbox {
+    align-items: center;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.checkbox label {
+    margin-left: 10px;
+}
+
+.checkbox input {
+    width : 20%;
+}
+button {
+    width: 100%;
+    padding: 12px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    background-color: #141313;
+}
+button:hover {
+    background-color: #b96930;
+}
+
+p {
+    margin-top: 20px;
+}
+
+a {
+    color: #b96930;
+    text-decoration: none;
+    width: 80%;
+}
+a:hover {
+    text-decoration: underline;
+}
+
+/* signup page */
+body {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fdfdfd;
+}
+
+/* Main Container */
+.signup-container {
+    width: 90%;
+    max-width: 1000px;
+    height: 90vh;
+    display: flex;
+    border: 8px solid #ff9f68;
+}
+
+/* Left Section */
+.left-section {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+}
+
+.left-section img {
+    width: 70%;
+}
+
+/* Right Section */
+.right-section {
+    width: 50%;
+    padding: 60px;
+}
+
+.right-section h1 {
+    color: #ff9f68;
+    font-size: 36px;
+    margin-bottom: 40px;
+}
+
+/* Input Styling */
+.input-group {
+    margin-bottom: 25px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.input-group input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    padding: 10px 5px;
+    font-size: 15px;
+    outline: none;
+}
+
+.input-group input:focus {
+    border-bottom-color: #ff9f68;
+}
+
+/* Button */
+.signup-btn {
+    margin-top: 30px;
+    padding: 12px 40px;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    width: 100%;
+}

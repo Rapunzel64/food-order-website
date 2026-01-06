@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Menu - Foodie Delight</title>
-    <link rel="stylesheet" href="style.css">
+    <title>About Us - Foodie Delight</title>
+    <link rel="stylesheet" href="..\/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -12,14 +12,14 @@
     <header>
         <div class="container">
             <div class="logo">
-                <img src="img/logo.png" alt="Foodie Delight Logo">
+                <img src="../img/logo.png" alt="Foodie Delight Logo">
                 <h1>Foodie Delight</h1>
             </div>
             <nav>
                 <ul class="nav-links">
                     <li><a href="index.html">Home</a></li>
-                    <li><a href="menu.html" class="active">Menu</a></li>
-                    <li><a href="about.html">About</a></li>
+                    <li><a href="menu.html">Menu</a></li>
+                    <li><a href="about.html" class="active">About</a></li>
                     <li><a href="contact.html">Contact</a></li>
                     <li><a href="#" id="cartLink">Cart <span class="cart-count">0</span></a></li>
                 </ul>
@@ -27,26 +27,31 @@
         </div>
     </header>
 
-    <!-- Menu Section -->
-    <section class="menu-page">
+
+    <!-- About Section -->
+    <section class="about-page">
         <div class="container">
-            <div class="menu-header">
-                <h1>Our Delicious Menu</h1>
-                <p>Explore our wide selection of mouth-watering dishes</p>
+            <div class="about-header">
+                <h1>About Foodie Delight</h1>
+                <p>Learn more about our story and mission</p>
             </div>
             
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-category="all">All Items</button>
-                <button class="filter-btn" data-category="pizza">Pizza</button>
-                <button class="filter-btn" data-category="burger">Burgers</button>
-                <button class="filter-btn" data-category="sandwich">Sandwiches</button>
-            </div>
-            
-            <div class="food-grid" id="menuFoods">
-                <!-- Menu items will be loaded here by JavaScript -->
+            <div class="about-content">
+                <h2>Our Story</h2>
+                <p>Founded in 2025, Foodie Delight began with a simple mission: to deliver delicious, high-quality food to our customers' doorsteps. What started as a small kitchen operation has grown into a beloved local favorite, known for our innovative recipes and exceptional service.</p>
+                
+                <h2>Our Mission</h2>
+                <p>We believe that great food brings people together. Our mission is to create memorable dining experiences by using the freshest ingredients, crafting unique flavors, and providing outstanding customer service. Every dish we prepare is made with passion and care.</p>
+                
+                <h2>Quality Ingredients</h2>
+                <p>We source our ingredients from local farmers and suppliers who share our commitment to quality and sustainability. From farm-fresh vegetables to premium meats, we ensure that every component of our dishes meets our high standards.</p>
+                
+                <h2>Our Chefs</h2>
+                <p>Our talented team of chefs brings years of experience and creativity to the kitchen. Each chef specializes in different cuisines, allowing us to offer a diverse menu that caters to all tastes and preferences.</p>
             </div>
         </div>
     </section>
+
 
     <!-- Cart Modal -->
     <div class="cart-modal" id="cartModal">
@@ -70,6 +75,7 @@
         </div>
     </div>
 
+    
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -100,6 +106,6 @@
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="../script.js"></script>
 </body>
 </html>
