@@ -51,7 +51,7 @@ const foodData = [
 ];
 
 // Cart array
-let cart = [];
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
 // Resolve asset path so images load correctly from pages inside `htmlfiles/`
 function resolveAssetPath(assetPath) {
@@ -71,38 +71,28 @@ const cartModal = document.getElementById('cartModal');
 const closeCart = document.getElementById('closeCart');
 const cartItems = document.getElementById('cartItems');
 const cartTotal = document.getElementById('cartTotal');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const billModal = document.getElementById('billModal');
+const billPreview = document.getElementById('billPreview');
+const closeBill = document.getElementById('closeBill');
 const cartCount = document.querySelector('.cart-count');
 const featuredFoods = document.getElementById('featuredFoods');
-const checkoutBtn = document.getElementById('checkoutBtn');
+
+cartLink?.addEventListener("click", () => {
+    cartModal.style.display = "flex";
+    renderCart();
+});
+
+closeCart?.addEventListener("click", () => {
+    cartModal.style.display = "none";
+});
+
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     loadCartFromLocalStorage();
     displayFeaturedFoods();
-    updateCartUI();
-    
-    // Event Listeners
-    if (cartLink) {
-        cartLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            openCart();
-        });
-    }
-    closeCart.addEventListener('click', closeCartModal);
-    if (checkoutBtn) {
-        console.log('checkoutBtn found, attaching listener');
-        checkoutBtn.addEventListener('click', function(e) {
-            console.log('checkoutBtn clicked');
-            checkout(e);
-        });
-    }
-    
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        if (event.target === cartModal) {
-            closeCartModal();
-        }
-    });
+    renderCart();
 });
 
 // Display featured foods
@@ -138,318 +128,169 @@ function displayFeaturedFoods() {
 
 // Add item to cart
 function addToCart(foodId) {
-    console.log('addToCart called with id:', foodId);
     const food = foodData.find(item => item.id === foodId);
-    
     if (food) {
-        // Check if item already in cart
         const existingItem = cart.find(item => item.id === foodId);
-        
         if (existingItem) {
-            existingItem.quantity += 1;
+            existingItem.qty += 1;
         } else {
             cart.push({
                 id: food.id,
                 name: food.name,
                 price: food.price,
                 image: food.image,
-                quantity: 1
+                qty: 1
             });
         }
-        
         saveCartToLocalStorage();
-        updateCartUI();
-        
-        // Show confirmation
+        renderCart();
         alert(`${food.name} added to cart!`);
     }
-}
+} 
 
 // Remove item from cart
 function removeFromCart(foodId) {
     cart = cart.filter(item => item.id !== foodId);
     saveCartToLocalStorage();
-    updateCartUI();
+    renderCart();
 }
 
 // Update item quantity
 function updateQuantity(foodId, change) {
     const item = cart.find(item => item.id === foodId);
-    
-    if (item) {
-        item.quantity += change;
-        
-        if (item.quantity <= 0) {
-            removeFromCart(foodId);
-        } else {
-            saveCartToLocalStorage();
-            updateCartUI();
-        }
+    if (!item) return;
+
+    item.qty += change;
+    if (item.qty <= 0) {
+        removeFromCart(foodId);
+    } else {
+        saveCartToLocalStorage();
+        renderCart();
     }
 }
 
-// Update cart UI
-function updateCartUI() {
-    // Update cart count
-    const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-    cartCount.textContent = totalItems;
-    
-    // Update cart modal
-    if (cart.length === 0) {
-        cartItems.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
-        cartTotal.textContent = '0.00';
-        return;
-    }
-    
+
+
+
+// ================= RENDER CART =================
+function renderCart() {
     cartItems.innerHTML = '';
     let total = 0;
-    
-    cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        
-        const cartItem = document.createElement('div');
-        cartItem.className = 'cart-item';
-        cartItem.innerHTML = `
-            <div class="item-info">
-                <h4>${item.name}</h4>
-                <p class="item-price">$${item.price.toFixed(2)} each</p>
-            </div>
-            <div class="item-quantity">
-                <button class="quantity-btn minus" data-id="${item.id}">-</button>
-                <span class="quantity">${item.quantity}</span>
-                <button class="quantity-btn plus" data-id="${item.id}">+</button>
-            </div>
-            <p class="item-total">$${itemTotal.toFixed(2)}</p>
-            <button class="remove-item" data-id="${item.id}">×</button>
-        `;
-        
-        cartItems.appendChild(cartItem);
-    });
-    
-    cartTotal.textContent = total.toFixed(2);
-    
-    // Enable/disable checkout button based on cart contents
-    if (checkoutBtn) {
-        checkoutBtn.disabled = cart.length === 0;
+
+    // Update cart count
+    const totalItems = cart.reduce((total, item) => total + (item.qty || 0), 0);
+    if (cartCount) cartCount.textContent = totalItems;
+
+    if (cart.length === 0) {
+        cartItems.innerHTML = `<p class="empty-cart-message">Your cart is empty</p>`;
+        cartTotal.innerText = '0.00';
+        if (checkoutBtn) checkoutBtn.disabled = true;
+        return;
     }
-    
-    // Add event listeners to cart buttons
-    document.querySelectorAll('.quantity-btn.minus').forEach(button => {
+
+    if (checkoutBtn) checkoutBtn.disabled = false;
+
+    cart.forEach(item => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+
+        cartItems.innerHTML += `
+            <div class="cart-item" data-id="${item.id}">
+                <div class="item-info">
+                    <h4>${item.name}</h4>
+                    <p>$${item.price.toFixed(2)} × ${item.qty} = $${itemTotal.toFixed(2)}</p>
+                </div>
+                <div class="item-controls">
+                    <button class="qty-btn minus" data-id="${item.id}">-</button>
+                    <span class="qty">${item.qty}</span>
+                    <button class="qty-btn plus" data-id="${item.id}">+</button>
+                    <button class="remove-item" data-id="${item.id}">❌</button>
+                </div>
+            </div>
+        `;
+    });
+
+    cartTotal.innerText = total.toFixed(2);
+
+    // Attach event listeners for quantity and remove buttons
+    cartItems.querySelectorAll('.qty-btn.minus').forEach(button => {
         button.addEventListener('click', function() {
             const foodId = parseInt(this.getAttribute('data-id'));
             updateQuantity(foodId, -1);
         });
     });
-    
-    document.querySelectorAll('.quantity-btn.plus').forEach(button => {
+
+    cartItems.querySelectorAll('.qty-btn.plus').forEach(button => {
         button.addEventListener('click', function() {
             const foodId = parseInt(this.getAttribute('data-id'));
             updateQuantity(foodId, 1);
         });
     });
-    
-    document.querySelectorAll('.remove-item').forEach(button => {
+
+    cartItems.querySelectorAll('.remove-item').forEach(button => {
         button.addEventListener('click', function() {
             const foodId = parseInt(this.getAttribute('data-id'));
             removeFromCart(foodId);
         });
     });
-}
+} 
 
 // Open cart modal
 function openCart() {
     cartModal.style.display = 'flex';
-}
+    renderCart();
+} 
 
 // Close cart modal
 function closeCartModal() {
     cartModal.style.display = 'none';
 }
 
-// Checkout function
-function checkout(event) {
-    console.log('checkout invoked, cart length:', cart.length, 'cart:', cart);
-    if (cart.length === 0) {
-        alert('Your cart is empty!');
-        return;
-    }
-    try {
-        // Save order to localStorage
-        const order = {
-            items: [...cart],
-            total: parseFloat(cartTotal.textContent),
-            timestamp: new Date().toISOString()
-        };
-        
-        // Get existing orders or initialize empty array
-        const orders = JSON.parse(localStorage.getItem('orders')) || [];
-        orders.push(order);
-        localStorage.setItem('orders', JSON.stringify(orders));
-        
-        // Generate bill preview
-        generateBillPreview(order);
-        
-        // Clear cart
-        cart = [];
-        saveCartToLocalStorage();
-        updateCartUI();
-        closeCartModal();
-    } catch (err) {
-        console.error('Checkout error:', err);
-        alert('Checkout failed: ' + (err && err.message ? err.message : err));
-    }
-}
+// ================= CHECKOUT =================
+checkoutBtn?.addEventListener("click", () => {
+    cartModal.style.display = "none";
+    showBillPreview();
+});
 
-// Generate bill preview
-function generateBillPreview(order) {
-    console.log('generateBillPreview called. order:', order);
-    // Create bill content
-    let billContent = `
-=====================================
-          FOODIE DELIGHT
-      ORDER RECEIPT & BILL
-=====================================
+// ================= BILL PREVIEW =================
+function showBillPreview() {
+    let billText = "🧾 FOODIE DELIGHT - BILL\n\n";
+    let grandTotal = 0;
 
-Date: ${new Date(order.timestamp).toLocaleString()}
-
-Items:
--------------------------------------
-`;
-    
-    order.items.forEach(item => {
-        const itemTotal = (item.price * item.quantity).toFixed(2);
-        billContent += `${item.name}
-  Price: $${item.price.toFixed(2)} x ${item.quantity} = $${itemTotal}
--------------------------------------
-`;
+    cart.forEach(item => {
+        let sub = item.price * item.qty;
+        grandTotal += sub;
+        billText += `${item.name}  x${item.qty}  = $${sub.toFixed(2)}\n`;
     });
-    
-    billContent += `
-Total Amount: $${order.total.toFixed(2)}
 
-=====================================
-    Thank you for your order!
-  Visit us again at Foodie Delight
-=====================================
-`;
-    
-    // Show bill preview modal
-    showBillPreview(billContent, order);
-} 
+    billText += `\n------------------------\n`;
+    billText += `TOTAL: $${grandTotal.toFixed(2)}\n`;
+    billText += `Thank you for ordering ❤️`;
 
-// Show bill preview modal
-function showBillPreview(billContent, order) {
-    console.log('showBillPreview called, billContent length:', billContent ? billContent.length : 0);
-    // Create modal if it doesn't exist
-    let billModal = document.getElementById('billModal');
-    if (!billModal) {
-        billModal = document.createElement('div');
-        billModal.id = 'billModal';
-        billModal.className = 'cart-modal';
-        billModal.innerHTML = `
-            <div class="cart-content" style="width: 90%; max-width: 700px;">
-                <div class="cart-header">
-                    <h2>Order Bill Preview</h2>
-                    <span class="close-btn" id="closeBill">&times;</span>
-                </div>
-                <div class="cart-body" style="padding: 20px;">
-                    <div id="billPreview" style="white-space: pre-wrap; font-family: monospace; background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; max-height: 400px; overflow-y: auto;">
-                        <!-- Bill content will be inserted here -->
-                    </div>
-                    <div class="cart-footer" style="display: flex; gap: 10px; justify-content: center;">
-                        <button class="btn-primary" id="downloadTxt" style="background: #28a745;">Download as TXT</button>
-                        <button class="btn-primary" id="downloadPdf" style="background: #dc3545;">Download as PDF</button>
-                        <button class="btn-primary" id="closeBillBtn">Close</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(billModal);
-        
-        // Add event listeners safely using local queries
-        const closeEl = billModal.querySelector('#closeBill');
-        if (closeEl) closeEl.addEventListener('click', () => {
-            billModal.style.display = 'none';
-        });
-        const closeBtn = billModal.querySelector('#closeBillBtn');
-        if (closeBtn) closeBtn.addEventListener('click', () => {
-            billModal.style.display = 'none';
-        });
-        const downloadTxt = billModal.querySelector('#downloadTxt');
-        if (downloadTxt) downloadTxt.addEventListener('click', () => {
-            downloadBillAsTxt(billContent, order);
-        });
-        const downloadPdf = billModal.querySelector('#downloadPdf');
-        if (downloadPdf) downloadPdf.addEventListener('click', () => {
-            downloadBillAsPdf(billContent, order);
-        });
-        
-        // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
-            if (event.target === billModal) {
-                billModal.style.display = 'none';
-            }
-        });
-    }
-    
-    // Update bill content
-    const billPreviewEl = document.getElementById('billPreview') || (billModal && billModal.querySelector('#billPreview'));
-    if (!billPreviewEl) {
-        console.error('billPreview element not found');
-    } else {
-        billPreviewEl.textContent = billContent;
-    }
-    
-    // Show modal
-    if (billModal) {
-        billModal.style.display = 'flex';
-        console.log('billModal displayed');
-    } else {
-        console.error('billModal not available to display');
-    }
+    billPreview.textContent = billText;
+    billModal.style.display = "flex";
 }
 
-// Download bill as TXT
-function downloadBillAsTxt(billContent, order) {
-    const blob = new Blob([billContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `foodie-delight-bill-${new Date(order.timestamp).getTime()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
+closeBill?.addEventListener("click", () => {
+    billModal.style.display = "none";
+});
 
-// Download bill as PDF
-function downloadBillAsPdf(billContent, order) {
-    // For simplicity, we'll create a print-friendly version and trigger print
-    // In a real application, you might use a library like jsPDF
-    
-    const printWindow = window.open('', '_blank');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Foodie Delight Bill</title>
-            <style>
-                body { font-family: monospace; margin: 20px; }
-                pre { white-space: pre-wrap; }
-            </style>
-        </head>
-        <body>
-            <pre>${billContent}</pre>
-            <script>
-                window.onload = function() {
-                    window.print();
-                }
-            </script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
-}
+// ================= CONFIRM ORDER =================
+document.getElementById("confirmOrder")?.addEventListener("click", () => {
+    // Save order to localStorage orders array
+    const orderItems = cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty }));
+    const totalAmount = parseFloat(cartTotal.innerText) || orderItems.reduce((s, it) => s + it.price * it.qty, 0);
+    const order = { items: orderItems, total: totalAmount, timestamp: new Date().toISOString() };
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    orders.push(order);
+    localStorage.setItem('orders', JSON.stringify(orders));
+
+    alert("🎉 Order Confirmed!");
+    cart = [];
+    saveCartToLocalStorage();
+    billModal.style.display = "none";
+    renderCart();
+});
 
 // Save cart to localStorage
 function saveCartToLocalStorage() {
@@ -521,7 +362,7 @@ function setupFilterButtons() {
 if (document.querySelector('.menu-page')) {
     document.addEventListener('DOMContentLoaded', function() {
         loadCartFromLocalStorage();
-        updateCartUI();
+        renderCart();
         displayMenuFoods();
         setupFilterButtons();
         
@@ -533,7 +374,7 @@ if (document.querySelector('.menu-page')) {
                 openCart();
             });
         }
-        closeCart.addEventListener('click', closeCartModal);
+        closeCart?.addEventListener('click', closeCartModal);
         
         // Close modal when clicking outside
         window.addEventListener('click', function(event) {
@@ -548,7 +389,7 @@ if (document.querySelector('.menu-page')) {
 if (document.querySelector('.about-page')) {
     document.addEventListener('DOMContentLoaded', function() {
         loadCartFromLocalStorage();
-        updateCartUI();
+        renderCart();
         
         // Event Listeners
         const cartLink = document.getElementById('cartLink');
@@ -558,7 +399,7 @@ if (document.querySelector('.about-page')) {
                 openCart();
             });
         }
-        closeCart.addEventListener('click', closeCartModal);
+        closeCart?.addEventListener('click', closeCartModal);
         
         // Close modal when clicking outside
         window.addEventListener('click', function(event) {
@@ -573,7 +414,7 @@ if (document.querySelector('.about-page')) {
 if (document.querySelector('.contact-page')) {
     document.addEventListener('DOMContentLoaded', function() {
         loadCartFromLocalStorage();
-        updateCartUI();
+        renderCart();
         
         // Event Listeners
         const cartLink = document.getElementById('cartLink');
@@ -583,7 +424,7 @@ if (document.querySelector('.contact-page')) {
                 openCart();
             });
         }
-        closeCart.addEventListener('click', closeCartModal);
+        closeCart?.addEventListener('click', closeCartModal);
         
         // Close modal when clicking outside
         window.addEventListener('click', function(event) {
