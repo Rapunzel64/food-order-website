@@ -170,8 +170,6 @@ function updateQuantity(foodId, change) {
 }
 
 
-
-
 // ================= RENDER CART =================
 function renderCart() {
     cartItems.innerHTML = '';
