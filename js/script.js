@@ -56,7 +56,7 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 // Resolve asset path so images load correctly from pages inside `htmlfiles/`
 function resolveAssetPath(assetPath) {
     try {
-        if (window.location && window.location.pathname && window.location.pathname.includes('/htmlfiles/')) {
+        if (window.location && window.location.pathname && window.location.pathname.includes('/pages/')) {
             return '..\/' + assetPath;
         }
     } catch (e) {
@@ -89,7 +89,7 @@ closeCart?.addEventListener("click", () => {
 
 
 // Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadCartFromLocalStorage();
     displayFeaturedFoods();
     renderCart();
@@ -98,10 +98,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // Display featured foods
 function displayFeaturedFoods() {
     featuredFoods.innerHTML = '';
-    
+
     // Get first 3 items as featured
     const featuredItems = foodData.slice(0, 3);
-    
+
     featuredItems.forEach(food => {
         const foodCard = document.createElement('div');
         foodCard.className = 'food-card';
@@ -116,10 +116,10 @@ function displayFeaturedFoods() {
         `;
         featuredFoods.appendChild(foodCard);
     });
-    
+
     // Add event listeners to add to cart buttons
     document.querySelectorAll('.add-to-cart').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const foodId = parseInt(this.getAttribute('data-id'));
             addToCart(foodId);
         });
@@ -146,7 +146,7 @@ function addToCart(foodId) {
         renderCart();
         alert(`${food.name} added to cart!`);
     }
-} 
+}
 
 // Remove item from cart
 function removeFromCart(foodId) {
@@ -168,7 +168,6 @@ function updateQuantity(foodId, change) {
         renderCart();
     }
 }
-
 
 // ================= RENDER CART =================
 function renderCart() {
@@ -212,32 +211,32 @@ function renderCart() {
 
     // Attach event listeners for quantity and remove buttons
     cartItems.querySelectorAll('.qty-btn.minus').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const foodId = parseInt(this.getAttribute('data-id'));
             updateQuantity(foodId, -1);
         });
     });
 
     cartItems.querySelectorAll('.qty-btn.plus').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const foodId = parseInt(this.getAttribute('data-id'));
             updateQuantity(foodId, 1);
         });
     });
 
     cartItems.querySelectorAll('.remove-item').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const foodId = parseInt(this.getAttribute('data-id'));
             removeFromCart(foodId);
         });
     });
-} 
+}
 
 // Open cart modal
 function openCart() {
     cartModal.style.display = 'flex';
     renderCart();
-} 
+}
 
 // Close cart modal
 function closeCartModal() {
@@ -307,13 +306,13 @@ function loadCartFromLocalStorage() {
 function displayMenuFoods(category = 'all') {
     const menuFoods = document.getElementById('menuFoods');
     if (!menuFoods) return;
-    
+
     menuFoods.innerHTML = '';
-    
-    const filteredFoods = category === 'all' 
-        ? foodData 
+
+    const filteredFoods = category === 'all'
+        ? foodData
         : foodData.filter(food => food.category === category);
-    
+
     filteredFoods.forEach(food => {
         const foodCard = document.createElement('div');
         foodCard.className = 'food-card';
@@ -328,10 +327,10 @@ function displayMenuFoods(category = 'all') {
         `;
         menuFoods.appendChild(foodCard);
     });
-    
+
     // Add event listeners to add to cart buttons
     document.querySelectorAll('.add-to-cart').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const foodId = parseInt(this.getAttribute('data-id'));
             addToCart(foodId);
         });
@@ -342,13 +341,13 @@ function displayMenuFoods(category = 'all') {
 function setupFilterButtons() {
     const filterButtons = document.querySelectorAll('.filter-btn');
     filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             // Remove active class from all buttons
             filterButtons.forEach(btn => btn.classList.remove('active'));
-            
+
             // Add active class to clicked button
             this.classList.add('active');
-            
+
             // Get category and display foods
             const category = this.getAttribute('data-category');
             displayMenuFoods(category);
@@ -358,24 +357,24 @@ function setupFilterButtons() {
 
 // Initialize menu page if on menu page
 if (document.querySelector('.menu-page')) {
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         loadCartFromLocalStorage();
         renderCart();
         displayMenuFoods();
         setupFilterButtons();
-        
+
         // Event Listeners
         const cartLink = document.getElementById('cartLink');
         if (cartLink) {
-            cartLink.addEventListener('click', function(e) {
+            cartLink.addEventListener('click', function (e) {
                 e.preventDefault();
                 openCart();
             });
         }
         closeCart?.addEventListener('click', closeCartModal);
-        
+
         // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
+        window.addEventListener('click', function (event) {
             if (event.target === cartModal) {
                 closeCartModal();
             }
@@ -385,22 +384,22 @@ if (document.querySelector('.menu-page')) {
 
 // Initialize about page if on about page
 if (document.querySelector('.about-page')) {
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         loadCartFromLocalStorage();
         renderCart();
-        
+
         // Event Listeners
         const cartLink = document.getElementById('cartLink');
         if (cartLink) {
-            cartLink.addEventListener('click', function(e) {
+            cartLink.addEventListener('click', function (e) {
                 e.preventDefault();
                 openCart();
             });
         }
         closeCart?.addEventListener('click', closeCartModal);
-        
+
         // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
+        window.addEventListener('click', function (event) {
             if (event.target === cartModal) {
                 closeCartModal();
             }
@@ -410,38 +409,38 @@ if (document.querySelector('.about-page')) {
 
 // Initialize contact page if on contact page
 if (document.querySelector('.contact-page')) {
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         loadCartFromLocalStorage();
         renderCart();
-        
+
         // Event Listeners
         const cartLink = document.getElementById('cartLink');
         if (cartLink) {
-            cartLink.addEventListener('click', function(e) {
+            cartLink.addEventListener('click', function (e) {
                 e.preventDefault();
                 openCart();
             });
         }
         closeCart?.addEventListener('click', closeCartModal);
-        
+
         // Close modal when clicking outside
-        window.addEventListener('click', function(event) {
+        window.addEventListener('click', function (event) {
             if (event.target === cartModal) {
                 closeCartModal();
             }
         });
-        
+
         // Form submission
         const contactForm = document.getElementById('contactForm');
         if (contactForm) {
-            contactForm.addEventListener('submit', function(e) {
+            contactForm.addEventListener('submit', function (e) {
                 e.preventDefault();
-                
+
                 // Get form data
                 const name = document.getElementById('name').value;
                 const email = document.getElementById('email').value;
                 const message = document.getElementById('message').value;
-                
+
                 // Create contact message object
                 const contactMessage = {
                     name: name,
@@ -449,15 +448,15 @@ if (document.querySelector('.contact-page')) {
                     message: message,
                     timestamp: new Date().toISOString()
                 };
-                
+
                 // Save to localStorage
                 const messages = JSON.parse(localStorage.getItem('contactMessages')) || [];
                 messages.push(contactMessage);
                 localStorage.setItem('contactMessages', JSON.stringify(messages));
-                
+
                 // Reset form
                 contactForm.reset();
-                
+
                 // Show confirmation
                 alert('Thank you for your message! We will get back to you soon.');
             });

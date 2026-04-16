@@ -69,6 +69,7 @@ button {
     cursor: pointer;
     background-color: #141313;
 }
+
 button:hover {
     background-color: #b96930;
 }
@@ -82,6 +83,7 @@ a {
     text-decoration: none;
     width: 80%;
 }
+
 a:hover {
     text-decoration: underline;
 }
